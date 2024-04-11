@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Search</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- search box -->
+            <div class="input-group mb-3">
+                <input id="searchInput" type="text" class="form-control" placeholder="Enter city name">
+                <div class="input-group-append">
+                    <button id="searchButton" class="btn btn-outline-success" type="button">Search</button>
+                </div>
+            </div>
+
+            <!-- search result -->
+            <table id="searchResults" class="table table-bordered">
+                <!-- dynamically render -->
+            </table>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Bootstrap JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Get weather forecasts and dynamically render -->
+<script>
+    $(document).ready(function () {
+        const tableTitleMap = {
+            "date": "date",
+            "weather": "weather",
+            "temp_min": "lowest (℃)",
+            "temp_max": "highest (℃)",
+            "wind_max": "wind (m/s)",
+        };
+        $('#searchButton').click(function (e) {
+            e.preventDefault();
+            var query = $('#searchInput').val();
+
+            $.ajax({
+                url: '/weather/' + query,
+                type: 'GET',
+                success: function (jsonData) {
+                    $('#searchResults').empty();
+
+                    // 获取表格的引用
+                    var table = document.getElementById('searchResults');
+
+                    // 创建表格头部
+                    var thead = document.createElement('thead');
+                    var headerRow = document.createElement('tr');
+                    Object.keys(jsonData[0]).forEach(function (key) {
+                        var th = document.createElement('th');
+                        th.textContent = tableTitleMap[key] || key;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+
+                    // 创建表格体
+                    var tbody = document.createElement('tbody');
+                    jsonData.forEach(function (item) {
+                        var row = document.createElement('tr');
+                        Object.values(item).forEach(function (value) {
+                            var td = document.createElement('td');
+                            td.textContent = value;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    table.appendChild(tbody);
+                },
+
+                error: function (xhr, status, error) {
+                    // 处理可能出现的错误
+                    console.error("Error: " + status + " - " + error);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
